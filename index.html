@@ -59,7 +59,7 @@
 
 <body>
 
-  <h3>Paste link → Generate QR</h3>
+  <h3>QR Code Generator</h3>
 
   <input
     id="linkInput"
@@ -83,48 +83,62 @@
   </div>
 
   <script>
-    let currentQRUrl = "";
+  let currentQRUrl = "";
+  let qrCounter = 1; // resets when page reloads
 
-    function generateQR() {
-      const link = document.getElementById("linkInput").value.trim();
-      const box = document.getElementById("qrBox");
-      const btn = document.getElementById("downloadBtn");
+  function generateQR() {
+    const link = document.getElementById("linkInput").value.trim();
+    const box = document.getElementById("qrBox");
+    const btn = document.getElementById("downloadBtn");
 
-      if (!link) {
-        box.innerHTML = "NO QR CODE GENERATED";
-        btn.disabled = true;
-        currentQRUrl = "";
-        return;
-      }
-
-      currentQRUrl =
-        "https://api.qrserver.com/v1/create-qr-code/" +
-        "?size=600x600&data=" +
-        encodeURIComponent(link);
-
-      box.innerHTML = `<img src="${currentQRUrl}" alt="QR Code">`;
-      btn.disabled = false;
-    }
-
-    function clearAll() {
-      document.getElementById("linkInput").value = "";
-      document.getElementById("qrBox").innerHTML = "NO QR CODE GENERATED";
-      document.getElementById("downloadBtn").disabled = true;
+    if (!link) {
+      box.innerHTML = "NO QR CODE GENERATED";
+      btn.disabled = true;
       currentQRUrl = "";
-      document.getElementById("linkInput").focus();
+      return;
     }
 
-    function downloadQR() {
-      if (!currentQRUrl) return;
+    currentQRUrl =
+      "https://api.qrserver.com/v1/create-qr-code/" +
+      "?size=600x600&data=" +
+      encodeURIComponent(link);
 
+    box.innerHTML = `<img src="${currentQRUrl}" alt="QR Code">`;
+    btn.disabled = false;
+  }
+
+  function clearAll() {
+    document.getElementById("linkInput").value = "";
+    document.getElementById("qrBox").innerHTML = "NO QR CODE GENERATED";
+    document.getElementById("downloadBtn").disabled = true;
+    currentQRUrl = "";
+    document.getElementById("linkInput").focus();
+  }
+
+  async function downloadQR() {
+    if (!currentQRUrl) return;
+
+    try {
+      const response = await fetch(currentQRUrl);
+      const blob = await response.blob();
+
+      const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = currentQRUrl;
-      a.download = "qr-code.png";
+
+      a.href = url;
+      a.download = `QR_${qrCounter}.png`; // 👈 counter-based filename
       document.body.appendChild(a);
       a.click();
+
       document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      qrCounter++; // increment after download
+    } catch (err) {
+      alert("Failed to download QR code.");
     }
-  </script>
+  }
+</script>
 
 </body>
 </html>
