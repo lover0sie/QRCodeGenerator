@@ -3,23 +3,129 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body { font-family: Arial, sans-serif; max-width: 420px; margin:auto; padding:16px; }
-    input { width:100%; padding:10px; font-size:16px; }
-    img { display:block; margin:16px auto; width:220px; height:220px; border:1px solid #ddd; }
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 420px;
+      margin: auto;
+      padding: 16px;
+      text-align: center;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background: #eee;
+      color: #999;
+      cursor: not-allowed;
+    }
+
+    .qr-box {
+      width: 220px;
+      height: 220px;
+      margin: 12px auto;
+      border: 1px dashed #999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #777;
+      font-size: 14px;
+    }
+
+    .qr-box img {
+      width: 220px;
+      height: 220px;
+    }
+
+    .tip {
+      margin-top: 16px;
+      font-size: 13px;
+      color: #555;
+    }
   </style>
 </head>
+
 <body>
-  <h3>QR Code Generator</h3>
-  <input id="link" placeholder="Paste Google Drive link here" oninput="gen()">
-  <img id="qr" alt="QR appears here">
+
+  <h3>Paste link → Generate QR</h3>
+
+  <input
+    id="linkInput"
+    placeholder="Paste Google Drive link here"
+    oninput="generateQR()"
+  >
+
+  <button onclick="clearAll()">Clear</button>
+
+  <div class="qr-box" id="qrBox">
+    NO QR CODE GENERATED
+  </div>
+
+  <button id="downloadBtn" onclick="downloadQR()" disabled>
+    Download QR Code (PNG)
+  </button>
+
+  <div class="tip">
+    💡 <b>Tips:</b> Make sure to set the file sharing to
+    <i>“Anyone with the link”</i>.
+  </div>
 
   <script>
-    function gen(){
-      const v = document.getElementById("link").value.trim();
-      const img = document.getElementById("qr");
-      if(!v){ img.src=""; return; }
-      img.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(v);
+    let currentQRUrl = "";
+
+    function generateQR() {
+      const link = document.getElementById("linkInput").value.trim();
+      const box = document.getElementById("qrBox");
+      const btn = document.getElementById("downloadBtn");
+
+      if (!link) {
+        box.innerHTML = "NO QR CODE GENERATED";
+        btn.disabled = true;
+        currentQRUrl = "";
+        return;
+      }
+
+      currentQRUrl =
+        "https://api.qrserver.com/v1/create-qr-code/" +
+        "?size=600x600&data=" +
+        encodeURIComponent(link);
+
+      box.innerHTML = `<img src="${currentQRUrl}" alt="QR Code">`;
+      btn.disabled = false;
+    }
+
+    function clearAll() {
+      document.getElementById("linkInput").value = "";
+      document.getElementById("qrBox").innerHTML = "NO QR CODE GENERATED";
+      document.getElementById("downloadBtn").disabled = true;
+      currentQRUrl = "";
+      document.getElementById("linkInput").focus();
+    }
+
+    function downloadQR() {
+      if (!currentQRUrl) return;
+
+      const a = document.createElement("a");
+      a.href = currentQRUrl;
+      a.download = "qr-code.png";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     }
   </script>
+
 </body>
 </html>
+
