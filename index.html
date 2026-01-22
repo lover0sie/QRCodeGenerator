@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 420px; margin:auto; padding:16px; }
+    input { width:100%; padding:10px; font-size:16px; }
+    img { display:block; margin:16px auto; width:220px; height:220px; border:1px solid #ddd; }
+  </style>
+</head>
+<body>
+  <h3>QR Code Generator</h3>
+  <input id="link" placeholder="Paste Google Drive link here" oninput="gen()">
+  <img id="qr" alt="QR appears here">
+
+  <script>
+    function gen(){
+      const v = document.getElementById("link").value.trim();
+      const img = document.getElementById("qr");
+      if(!v){ img.src=""; return; }
+      img.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(v);
+    }
+  </script>
+</body>
+</html>
